@@ -108,6 +108,7 @@ function App() {
       setUploading(false);
     }
   };
+  
 
   // Procesar archivo
   const processFile = async () => {
