@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Pro - Conversor de Archivos + Bot IA</title>
+    
+    <!-- Meta tags para compartir -->
+    <meta name="description" content="Convierte archivos entre Excel y Word fácilmente. Bot de IA integrado para manipular Excel con lenguaje natural.">
+    <meta property="og:title" content="Excel Pro - Conversor + Bot IA">
+    <meta property="og:description" content="Convierte y comparte archivos Excel y Word. Manipula Excel con comandos de voz.">
+    <meta property="og:type" content="website">
+    
+    <!-- PWA Meta tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Excel Pro">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-bacground-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .features {
+            margin: 30px 0;
+        }
+
+        .features h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #475569;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+            margin-top: 20px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Cargando Excel Pro...</p>
+        </div>
+    </div>
+
+    <!-- Información sobre la app (se mostrará si React no carga) -->
+    <noscript>
+        <div class="container">
+            <div class="header">
+                <div class="logo">📊</div>
+                <h1>Excel Pro</h1>
+                <p class="subtitle">Conversor de Archivos + Bot de IA</p>
+            </div>
+
+            <div class="features">
+                <h3>✨ Características</h3>
+                <ul class="feature-list">
+                    <li>Conversión bidireccional Excel ↔ Word</li>
+                    <li>Exportación a CSV y JSON</li>
+                    <li>Bot de Excel con IA integrado</li>
+                    <li>Comandos en lenguaje natural</li>
+                    <li>Compartir en múltiples plataformas</li>
+                    <li>Descarga local con selector de carpeta</li>
+                    <li>Compatible con Windows, macOS y Linux</li>
+                    <li>Integración opcional con N8N</li>
+                </ul>
+            </div>
+
+            <button class="cta-button" onclick="location.reload()">
+                🔄 Recargar Aplicación
+            </button>
+        </div>
+    </noscript>
+
+    <!-- Scripts de React se cargarán aquí -->
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
