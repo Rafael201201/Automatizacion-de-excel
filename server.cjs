@@ -214,6 +214,17 @@ app.get("/api/bot/download", (req, res) => {
   res.download(ACTIVE_XLSX_PATH, `archivo_modificado_${Date.now()}.xlsx`);
 });
 
+// 🆕 Ruta alternativa para compatibilidad con el ChatBot
+app.get("/download/active.xlsx", (req, res) => {
+  if (!fs.existsSync(ACTIVE_XLSX_PATH)) {
+    return res.status(404).json({
+      error: "No hay Excel activo. Sube uno primero con el botón 📎"
+    });
+  }
+  
+  res.download(ACTIVE_XLSX_PATH, `archivo_modificado_${Date.now()}.xlsx`);
+});
+
 // Status del Excel activo
 app.get("/api/bot/status", (req, res) => {
   const exists = fs.existsSync(ACTIVE_XLSX_PATH);

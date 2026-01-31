@@ -61,8 +61,7 @@ def allowed_file(filename):
 def generate_filename(original_name, action, extension):
     """Genera nombre de archivo único"""
     base_name = Path(original_name).stem
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    return f"{base_name}_{action}_{timestamp}{extension}"
+    return f"{base_name}_{action}_{extension}"
 
 def get_file_metadata(filepath):
     """Obtiene metadata del archivo"""
@@ -255,8 +254,7 @@ def upload_file():
             return jsonify({'error': 'Tipo de archivo no permitido'}), 400
         
         filename = secure_filename(file.filename)
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        unique_filename = f"{timestamp}_{filename}"
+        unique_filename = f"{filename}"
         filepath = UPLOAD_FOLDER / unique_filename
         
         file.save(str(filepath))

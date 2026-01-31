@@ -196,35 +196,87 @@ function App() {
     }
   };
 
-  // 🆕 NUEVA FUNCIÓN: Enviar archivo al chatbot para edición
+  // 🆕 FUNCIÓN MEJORADA: Enviar archivo al chatbot
   const sendToChatBot = async () => {
-    if (!processedFile) return;
+    if (!processedFile) {
+      console.error('No hay archivo procesado');
+      return;
+    }
 
     try {
-      // Descargar el archivo procesado como blob
-      const response = await fetch(processedFile.download_url);
+      console.log('📤 Iniciando envío al chatbot...');
+      console.log('Tipo de conversión:', conversionType);
+      console.log('Archivo procesado:', processedFile.filename);
       
-      if (!response.ok) {
-        throw new Error('No se pudo obtener el archivo');
+      let fileToSend;
+      let filename;
+
+      // LÓGICA MEJORADA: Decidir qué archivo enviar al bot
+      if (conversionType === 'word_to_excel') {
+        // Si convertimos Word → Excel, enviamos el Excel resultante
+        console.log('📥 Descargando Excel resultante...');
+        const response = await fetch(processedFile.download_url);
+        if (!response.ok) throw new Error('No se pudo obtener el archivo');
+        
+        const blob = await response.blob();
+        filename = processedFile.filename;
+        fileToSend = new File([blob], filename, {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        console.log('✅ Excel resultante obtenido:', filename);
+        
+      } else if (fileInfo?.type === 'excel') {
+        // Si el original era Excel, necesitamos descargarlo del servidor
+        console.log('📥 Descargando Excel original...');
+        
+        // Intentar obtener el archivo original desde el servidor
+        const originalUrl = `/api/download/${fileInfo.filename}`;
+        console.log('URL original:', originalUrl);
+        
+        try {
+          const response = await fetch(originalUrl);
+          if (response.ok) {
+            const blob = await response.blob();
+            filename = fileInfo.filename;
+            fileToSend = new File([blob], filename, {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            console.log('✅ Excel original obtenido desde servidor:', filename);
+          } else {
+            throw new Error('No se pudo descargar el archivo original');
+          }
+        } catch (downloadError) {
+          console.warn('⚠️ No se pudo descargar del servidor, intentando usar file object...', downloadError);
+          
+          // Fallback: usar el objeto file original si aún está disponible
+          if (file && file.name.endsWith('.xlsx')) {
+            fileToSend = file;
+            filename = file.name;
+            console.log('✅ Usando file object original:', filename);
+          } else {
+            throw new Error('El archivo Excel original ya no está disponible. Por favor, vuelve a subirlo.');
+          }
+        }
+        
+      } else {
+        throw new Error('No hay archivo Excel disponible para enviar al bot');
       }
 
-      const blob = await response.blob();
-      
-      // Crear un File object desde el blob
-      const file = new File([blob], processedFile.filename, {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
+      console.log('📤 Enviando al bot:', filename, 'Tamaño:', fileToSend.size, 'bytes');
 
       // Enviar al bot
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', fileToSend);
 
       const botResponse = await fetch('/api/bot/upload', {
         method: 'POST',
         body: formData
       });
 
+      console.log('Bot response status:', botResponse.status);
+      
       const botData = await botResponse.json();
+      console.log('Bot response data:', botData);
 
       if (botData.ok) {
         // Cerrar el modal
@@ -233,31 +285,32 @@ function App() {
         // Mostrar mensaje de éxito
         setMessage({
           type: 'success',
-          text: '🤖 Archivo cargado en el chatbot. ¡Ahora puedes editarlo!'
+          text: '🤖 Archivo cargado en el chatbot. ¡Ahora puedes editarlo con comandos!'
         });
 
-        // Notificar al chatbot (si tiene un método público)
+        // Notificar al chatbot
         if (chatBotRef.current?.handleExternalFileLoad) {
           chatBotRef.current.handleExternalFileLoad(botData);
         }
 
-        // Esperar 1 segundo y resetear
+        // Esperar y resetear mensaje
         setTimeout(() => {
-          reset();
-        }, 1500);
+          setMessage(null);
+        }, 3000);
 
       } else {
         throw new Error(botData.reply || 'Error al cargar en el bot');
       }
 
     } catch (error) {
+      console.error('❌ Error completo:', error);
       setMessage({
         type: 'error',
-        text: `❌ Error al enviar al chatbot: ${error.message}`
+        text: `❌ Error: ${error.message}`
       });
-      console.error('Error enviando al chatbot:', error);
     }
   };
+
 
   // Compartir en plataforma
   const shareOnPlatform = (platform) => {
@@ -503,7 +556,7 @@ function App() {
                 </div>
 
                 {/* 🆕 NUEVO: Botón para enviar al chatbot */}
-                {processedFile.filename.endsWith('.xlsx') && (
+                {(conversionType === 'word_to_excel' || fileInfo?.type === 'excel') && (
                   <div className="options-section">
                     <h4>🤖 Editar con ChatBot</h4>
                     <button 
@@ -516,7 +569,9 @@ function App() {
                       }}
                     >
                       <MessageCircle size={20} />
-                      Cargar en ChatBot para Editar
+                      {conversionType === 'word_to_excel' 
+                        ? 'Cargar Excel en ChatBot' 
+                        : 'Cargar Excel Original en ChatBot'}
                     </button>
                     <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
                       💡 Envía el archivo al chatbot y edítalo con comandos de voz

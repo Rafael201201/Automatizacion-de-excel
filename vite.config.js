@@ -7,22 +7,39 @@ export default defineConfig({
     port: 5173,
     open: true,
     proxy: {
-      '/api': {
-        target: 'http://localhost:5000',  // ← Directo a Python Flask
+      // Proxy para el BOT - DEBE IR PRIMERO (más específico)
+      '/api/bot': {
+        target: 'http://localhost:3000',  // ← Node.js server que maneja el bot
         changeOrigin: true,
         secure: false,
         ws: true,
         configure: (proxy, options) => {
           proxy.on('error', (err, req, res) => {
-            console.log('Error en proxy:', err.message);
+            console.log('❌ Error en proxy BOT:', err.message);
           });
           proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('→ Enviando a backend:', req.method, req.url);
+            console.log('🤖 Proxy BOT → Node.js:', req.method, req.url);
           });
         }
       },
+      // Proxy genérico para el resto de /api (Python)
+      '/api': {
+        target: 'http://localhost:5000',  // ← Python Flask para conversor
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('❌ Error en proxy Python:', err.message);
+          });
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('🐍 Proxy Python → Flask:', req.method, req.url);
+          });
+        }
+      },
+      // Proxy para descargas
       '/download': {
-        target: 'http://localhost:5000',  // ← Directo a Python Flask
+        target: 'http://localhost:3000',  // ← Node.js server
         changeOrigin: true,
         secure: false
       }
