@@ -16,8 +16,8 @@ const PORT = 3000;
 // CONFIGURACIÓN
 // ============================================
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ============================================
 // INICIAR SERVIDOR PYTHON AUTOMÁTICAMENTE
@@ -92,6 +92,9 @@ const pythonProxy = createProxyMiddleware({
   changeOrigin: true,
   timeout: 30000,
   proxyTimeout: 30000,
+  pathRewrite: {
+    '^/api/python': '/api'
+  },
   onError: (err, req, res) => {
     console.error('❌ Error en proxy a Python:', err.message);
     
@@ -110,12 +113,17 @@ const pythonProxy = createProxyMiddleware({
     });
   },
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`🔄 Proxy → Python: ${req.method} ${req.path}`);
+    console.log(`🔄 Proxy → Python: ${req.method} ${req.originalUrl} → ${proxyReq.path}`);
   },
   onProxyRes: (proxyRes, req, res) => {
-    console.log(`✅ Python → Cliente: ${proxyRes.statusCode} ${req.path}`);
+    console.log(`✅ Python → Cliente: ${proxyRes.statusCode}`);
   }
 });
+
+// ============================================
+// APLICAR PROXY A RUTAS DE PYTHON
+// ============================================
+app.use('/api/python', pythonProxy);
 
 // ============================================
 // RUTAS DEL BOT (MANEJADAS POR NODE.JS)

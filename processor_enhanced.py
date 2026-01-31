@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 API Flask mejorada para procesamiento de archivos con opciones de compartir
 Incluye integración con múltiples plataformas de compartir y descarga
 """
 
 from flask import Flask, request, jsonify, send_file
+import io
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
@@ -15,6 +17,10 @@ import json
 import base64
 import mimetypes
 
+
+# Configurar la codificación UTF-8 para la salida estándar
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 # Importar librerías de procesamiento
 from docx import Document
 import pandas as pd
@@ -53,10 +59,9 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def generate_filename(original_name, action, extension):
-    """Genera nombre de archivo único sin la hora"""
-    base_name = Path(original_name).stem[:15] # Limita el nombre original a 15 letras
-    # Cambiamos esto para que solo tenga Año-Mes-Día
-    timestamp = datetime.now().strftime('%Y-%m-%d') 
+    """Genera nombre de archivo único"""
+    base_name = Path(original_name).stem
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     return f"{base_name}_{action}_{timestamp}{extension}"
 
 def get_file_metadata(filepath):
@@ -235,7 +240,6 @@ def health():
         'version': '2.0'
     })
 
-
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
     """Sube archivo y retorna información preliminar"""
@@ -251,7 +255,8 @@ def upload_file():
             return jsonify({'error': 'Tipo de archivo no permitido'}), 400
         
         filename = secure_filename(file.filename)
-        unique_filename = f"{filename}"
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_filename = f"{timestamp}_{filename}"
         filepath = UPLOAD_FOLDER / unique_filename
         
         file.save(str(filepath))
@@ -333,17 +338,17 @@ def process_file():
                 df = pd.read_excel(str(input_path))
                 df.to_json(str(output_path), orient='records', indent=2, force_ascii=False)
             else:
-                print(f"[ERROR] Accion no implementada: {action}")
+                print(f"[ERROR] Acción no implementada: {action}")
                 return jsonify({'error': f'Acción no implementada: {action}'}), 400
             
-            print(f"[EXITO] Archivo procesado: {output_path}")
+            print(f"[ÉXITO] Archivo procesado: {output_path}")
             
             # Verificar que el archivo se creó
             if not output_path.exists():
                 raise Exception("El archivo procesado no se creó correctamente")
             
         except Exception as conv_error:
-            print(f"[ERROR] Error en conversion: {str(conv_error)}")
+            print(f"[ERROR] Error en conversión: {str(conv_error)}")
             traceback.print_exc()
             return jsonify({
                 'error': f'Error en conversión: {str(conv_error)}',
@@ -356,7 +361,7 @@ def process_file():
         # Generar URLs de compartir
         share_links = generate_share_links(output_filename, output_metadata)
         
-        print(f"[EXITO] Proceso completado exitosamente")
+        print(f"[ÉXITO] Proceso completado exitosamente")
         
         return jsonify({
             'success': True,
@@ -502,17 +507,17 @@ def generate_share_links(filename, metadata):
 
 if __name__ == '__main__':
     print("=" * 70)
-    print("Servidor de procesamiento de archivos MEJORADO v2.0")
+    print("🚀 Servidor de procesamiento de archivos MEJORADO v2.0")
     print("=" * 70)
-    print(f"Carpeta de uploads: {UPLOAD_FOLDER}")
-    print(f"Carpeta de outputs: {OUTPUT_FOLDER}")
-    print("Servidor corriendo en: http://localhost:5000")
+    print(f"📁 Carpeta de uploads: {UPLOAD_FOLDER}")
+    print(f"📁 Carpeta de outputs: {OUTPUT_FOLDER}")
+    print("🌐 Servidor corriendo en: http://localhost:5000")
     print("=" * 70)
-    print("Caracteristicas:")
-    print("   - Conversion Excel <-> Word")
-    print("   - Exportacion a CSV/JSON")
-    print("   - Compartir en multiples plataformas")
-    print("   - Sistema de descarga multiplataforma")
+    print("✨ Características:")
+    print("   • Conversión Excel ↔ Word")
+    print("   • Exportación a CSV/JSON")
+    print("   • Compartir en múltiples plataformas")
+    print("   • Sistema de descarga multiplataforma")
     print("=" * 70)
     
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -8,7 +8,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',  // ← Puerto del servidor Node.js unificado
+        target: 'http://localhost:5000',  // ← Directo a Python Flask
         changeOrigin: true,
         secure: false,
         ws: true,
@@ -22,7 +22,7 @@ export default defineConfig({
         }
       },
       '/download': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:5000',  // ← Directo a Python Flask
         changeOrigin: true,
         secure: false
       }

@@ -118,7 +118,7 @@ function App() {
     setMessage({ type: 'info', text: '⏳ Procesando archivo...' });
 
     try {
-      const response = await fetch(`${API_URL}/process`, {
+      const response = await fetch('/api/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
